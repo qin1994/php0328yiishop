@@ -43,8 +43,8 @@ class Brand extends \yii\db\ActiveRecord
     {
         return [
 
-            [['name','intro','sort'],'required','message'=>'{attribute}不能为空'],
-            ['imgFile','file','extensions'=>['jpg','png','gif'],'skipOnEmpty'=>false],
+            [['name','intro','sort','status'],'required','message'=>'{attribute}不能为空'],
+            ['imgFile','file','extensions'=>['jpg','png','gif']],
             //['code','captcha','captchaAction'=>'admin/captcha'],
         ];
     }
