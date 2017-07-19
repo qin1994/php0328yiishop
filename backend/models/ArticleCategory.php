@@ -25,6 +25,11 @@ class ArticleCategory extends \yii\db\ActiveRecord
         return $options;
     }
 
+    public static function getIndexStatus($options){
+        $status = [ -1=>'删除',0=>'隐藏',1=>'正常'];
+
+        return $status[$options];
+    }
     /**
      * @inheritdoc
      */
