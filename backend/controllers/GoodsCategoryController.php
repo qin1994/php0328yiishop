@@ -48,7 +48,7 @@ class GoodsCategoryController extends \yii\web\Controller
         $total = $query->count();
         //var_dump($total);exit;
         //每页显示条数 2
-        $perPage = 2;
+        $perPage = 4;
 
         //分页工具类
         $pager = new Pagination([
@@ -77,7 +77,14 @@ class GoodsCategoryController extends \yii\web\Controller
 
             }else{
                 //一级分类
-                $model->makeRoot();
+
+                if($model->oldAttributes['parent_id'] == 0){
+                    $model->save();
+
+                }else{
+                    $model->makeRoot();
+                }
+
             }
             \Yii::$app->session->setFlash('success','分类添加成功');
             return $this->redirect(['index']);
@@ -95,7 +102,8 @@ class GoodsCategoryController extends \yii\web\Controller
         if(empty($aa)){
             $model->delete();
         }else{
-            \Yii::$app->session->setFlash('success','分类下面有子类,不能删除');
+            //错误提示信息
+            \Yii::$app->session->setFlash('danger','分类下面有子类,不能删除');
         }
         return $this->redirect(['goods-category/index']);
     }
