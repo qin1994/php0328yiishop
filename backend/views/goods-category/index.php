@@ -1,5 +1,5 @@
 <?= \yii\bootstrap\Html::a('添加',['goods-category/add'],['class'=>'btn btn-info']) ?>
-    <table class="table table-bordered table-condensed">
+    <table class="table table-bordered table-condensed table-hover">
         <tr>
             <th>id</th>
             <th>名称</th>
