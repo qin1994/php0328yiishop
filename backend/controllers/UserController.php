@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\LoginForm;
+use backend\models\PasswordForm;
 use backend\models\User;
 use yii\web\Request;
 
@@ -68,4 +69,44 @@ class UserController extends \yii\web\Controller
         \Yii::$app->user->logout();
         return $this->redirect(['user/login']);
     }
+
+    //修改密码
+    public function actionPassword()
+    {
+        if(!\Yii::$app->user->isGuest){
+//            var_dump(\Yii::$app->user->identity->id);exit;
+            $model = new PasswordForm();
+            $request = new Request();
+            $user = User::findOne(['id'=>\Yii::$app->user->identity->id]);
+            if($request->isPost){
+                $model->load($request->post());
+                //验证旧密码是否正确
+                if(\Yii::$app->security->validatePassword($model->old_password,$user->password_hash)){
+                    //旧密码正确的情况下,验证旧密码和新密码是否一致
+                    if($model->old_password != $model->new_password){
+                        //如果不一致，验证新密码和确认密码是否一致
+                        if($model->new_password == $model->re_password){
+                            $user->password_hash = \Yii::$app->security->generatePasswordHash($model->new_password);
+                            $user->save();
+                            \Yii::$app->session->setFlash('success','密码修改成功');
+                            return $this->redirect(['user/index']);
+                        }else{
+                            $model->addError('re_password','新密码和确认密码不一致');
+                        }
+                    }else{
+                        $model->addError('new_password','旧密码和新密码相同');
+                    }
+                }else{
+                    $model->addError('old_password','旧密码不正确');
+                }
+            }
+            return $this->render('password',['model'=>$model]);
+        }else{
+            return $this->redirect(['user/login']);
+        }
+    }
+
+
+
+
 }
