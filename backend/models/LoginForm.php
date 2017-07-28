@@ -9,6 +9,7 @@ class LoginForm extends Model{
     public $username;
     public $password_hash;
 
+
     public function rules()
     {
         return [
@@ -23,7 +24,7 @@ class LoginForm extends Model{
         return [
             'username'=>'用户名',
             'password_hash'=>'密码',
-            'auto'=>'自动登录'
+            'auto'=>'自动登录',
         ];
     }
 

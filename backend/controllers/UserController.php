@@ -5,6 +5,7 @@ namespace backend\controllers;
 use backend\models\LoginForm;
 use backend\models\PasswordForm;
 use backend\models\User;
+use yii\helpers\ArrayHelper;
 use yii\web\Request;
 
 class UserController extends \yii\web\Controller
@@ -19,8 +20,16 @@ class UserController extends \yii\web\Controller
     public function actionAdd(){
         $model = new User();
         if($model->load(\Yii::$app->request->post()) && $model->validate()){
+            $authManager = \Yii::$app->authManager;
             $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password_hash);
             $model->save();
+            if(is_array($model->roles)){
+                foreach ($model->roles as $roleName){
+                    $role = $authManager->getRole($roleName);
+                    if($role) $authManager->assign($role,$model->id);
+                }
+            }
+
             return $this->redirect(['user/index']);
         }
         return $this->render('add',['model'=>$model]);
@@ -29,9 +38,21 @@ class UserController extends \yii\web\Controller
     //用户修改
     public function actionEdit($id){
         $model = User::findOne(['id'=>$id]);
+        $authManager = \Yii::$app->authManager;
+        $roles = $authManager->getRolesByUser($id);
+        $model->roles = ArrayHelper::map($roles,'name','name');
         if($model->load(\Yii::$app->request->post()) && $model->validate()){
             $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password_hash);
             $model->save();
+
+            $authManager->revokeAll($id);
+            if(is_array($model->roles)){
+                foreach ($model->roles as $roleName){
+                    $role = $authManager->getRole($roleName);
+                    if($role) $authManager->assign($role,$model->id);
+                }
+            }
+            \Yii::$app->session->setFlash('success','修改成功');
             return $this->redirect(['user/index']);
         }
         return $this->render('add',['model'=>$model]);
@@ -39,6 +60,9 @@ class UserController extends \yii\web\Controller
 
     //用户删除
     public function actionDelete($id){
+
+       // $authManager = \Yii::$app->authManager;
+        //$authManager->revokeAll($id);
         User::findOne(['id'=>$id])->delete();
         return $this->redirect(['user/index']);
     }

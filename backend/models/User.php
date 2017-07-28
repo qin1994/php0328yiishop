@@ -26,6 +26,8 @@ class User extends ActiveRecord implements IdentityInterface
     /**
      * @inheritdoc
      */
+    public $roles=[];
+
     public static function tableName()
     {
         return 'user';
@@ -44,6 +46,7 @@ class User extends ActiveRecord implements IdentityInterface
             [['username'], 'unique'],
             [['email'], 'unique'],
             [['password_reset_token'], 'unique'],
+            [['roles'],'safe']
         ];
     }
 
@@ -59,6 +62,7 @@ class User extends ActiveRecord implements IdentityInterface
             'password_hash' => '密码',
             'password_reset_token' => '重置密码',
             'email' => 'Email',
+            'roles' => '角色',
             'status' => '是否为管理员',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
