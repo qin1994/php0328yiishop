@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use backend\filters\RbacFilter;
 use backend\models\PermissionForm;
 use backend\models\RoleForm;
 //use Behat\Gherkin\Loader\YamlFileLoader;
@@ -158,5 +159,13 @@ class RbacController extends \yii\web\Controller
         $authManage->remove($role);
         \Yii::$app->session->setFlash('success','角色删除成功');
         return $this->redirect(['index-role']);
+    }
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilter::className(),
+            ]
+        ];
     }
 }
