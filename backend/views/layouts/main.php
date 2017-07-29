@@ -29,7 +29,7 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'My Company',
+        'brandLabel' => '后台管理',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
@@ -39,9 +39,30 @@ AppAsset::register($this);
         ['label' => '首页', 'url' => ['/user/index']],
         ['label' => '修改密码', 'url' => ['/user/password']],
    ];
+    $menuItems = [];
+    $menus = \backend\models\Menu::find()->where(['parent_id'=>1])->all();
+    foreach ($menus as $menu){
+        $items = [];
+        //根据上级菜单找到子菜单
+        $children = \backend\models\Menu::find()->where(['parent_id'=>$menu->id])->all();
+        foreach ($children as $child){
+            //判断当前用户是否有该路由的权限
+            if(Yii::$app->user->can($child->url)){
+                $items[] = ['label'=>$child->name,'url'=>[$child->url]];
+            }
+
+        }
+        //一级菜单
+        //没有子菜单是,不显示以及菜单
+        if(!empty($items)){
+            $menuItems[] = ['label'=>$menu->name,'items'=>$items];
+        }
+
+    }
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => '登录', 'url' => ['/user/login']];
     } else {
+
         $menuItems[] = '<li>'
             . Html::beginForm(['/user/logout'], 'post')
             . Html::submitButton(
