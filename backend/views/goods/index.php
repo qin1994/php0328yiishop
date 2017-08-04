@@ -31,7 +31,8 @@
                 <td><?=\yii\bootstrap\Html::img($good->logo?$good->logo:'upload/default.png',['height'=>50])?></td>
 
                 <td><?=backend\models\Brand::getIndexStatus($good->status)?></td>
-                <td><?=\yii\bootstrap\Html::a('删除',['goods/delete', 'id'=>$good->id],['class'=>'btn btn-danger']) ?>
+                <td> <?=\yii\bootstrap\Html::a('相册',['gallery','id'=>$good->id],['class'=>'btn btn-default'])?>
+                    <?=\yii\bootstrap\Html::a('删除',['goods/delete', 'id'=>$good->id],['class'=>'btn btn-danger']) ?>
                     <?= \yii\bootstrap\Html::a('修改',['goods/edit','id'=>$good->id],['class'=>'btn btn-info'])?>
                 </td>
             </tr>

@@ -2,16 +2,18 @@
 
 namespace backend\controllers;
 
-use backend\filters\RbacFilter;
+//use backend\filters\RbacFilter;
 use backend\models\Brand;
 use backend\models\Goods;
 use backend\models\GoodsCategory;
 use backend\models\GoodsDayCount;
+use backend\models\GoodsGallery;
 use backend\models\GoodsIntro;
 use backend\models\GoodsSearchForm;
 use flyok666\uploadifive\UploadAction;
 
 use yii\data\Pagination;
+use yii\web\NotFoundHttpException;
 use yii\web\Request;
 
 class GoodsController extends \yii\web\Controller
@@ -127,12 +129,48 @@ class GoodsController extends \yii\web\Controller
         \Yii::$app->session->setFlash('success', '删除成功');
         return $this->redirect(['goods/index']);
     }
+    /*
+     * 商品相册
+     */
+    public function actionGallery($id)
+    {
+        $goods = Goods::findOne(['id'=>$id]);
+        if($goods == null){
+            throw new NotFoundHttpException('商品不存在');
+        }
+
+
+        return $this->render('gallery',['goods'=>$goods]);
+
+    }
+
+    /*
+     * AJAX删除图片
+     */
+    public function actionDelGallery(){
+        $id = \Yii::$app->request->post('id');
+        $model = GoodsGallery::findOne(['id'=>$id]);
+        if($model && $model->delete()){
+            return 'success';
+        }else{
+            return 'fail';
+        }
+
+    }
 
 
 
 
     public function actions() {
         return [
+            'upload' => [
+                'class' => 'kucha\ueditor\UEditorAction',
+                'config' => [
+                    "imageUrlPrefix"  => "http://admin.yii2shop.com",//图片访问路径前缀
+                    "imagePathFormat" => "/upload/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
+                    "imageRoot" => \Yii::getAlias("@webroot"),
+                ],
+            ],
             's-upload' => [
                 'class' => UploadAction::className(),
                 'basePath' => '@webroot/upload',
@@ -143,12 +181,12 @@ class GoodsController extends \yii\web\Controller
                 //'format' => [$this, 'methodName'],
                 //END METHOD
                 //BEGIN CLOSURE BY-HASH
-                'overwriteIfExist' => true,
-                /*'format' => function (UploadAction $action) {
-                    $fileext = $action->uploadfile->getExtension();
-                    $filename = sha1_file($action->uploadfile->tempName);
-                    return "{$filename}.{$fileext}";
-                },*/
+                'overwriteIfExist' => true,//如果文件已存在，是否覆盖
+                /* 'format' => function (UploadAction $action) {
+                     $fileext = $action->uploadfile->getExtension();
+                     $filename = sha1_file($action->uploadfile->tempName);
+                     return "{$filename}.{$fileext}";
+                 },*/
                 //END CLOSURE BY-HASH
                 //BEGIN CLOSURE BY TIME
                 'format' => function (UploadAction $action) {
@@ -157,7 +195,7 @@ class GoodsController extends \yii\web\Controller
                     $p1 = substr($filehash, 0, 2);
                     $p2 = substr($filehash, 2, 2);
                     return "{$p1}/{$p2}/{$filehash}.{$fileext}";
-                },
+                },//文件的保存方式
                 //END CLOSURE BY TIME
                 'validateOptions' => [
                     'extensions' => ['jpg', 'png'],
@@ -169,7 +207,20 @@ class GoodsController extends \yii\web\Controller
                 'afterValidate' => function (UploadAction $action) {},
                 'beforeSave' => function (UploadAction $action) {},
                 'afterSave' => function (UploadAction $action) {
-                    $action->output['fileUrl'] = $action->getWebUrl();//输出文件的相对路径
+                    $goods_id = \Yii::$app->request->post('goods_id');
+                    if($goods_id){
+                        $model = new GoodsGallery();
+                        $model->goods_id = $goods_id;
+                        $model->path = $action->getWebUrl();
+                        $model->save();
+                        $action->output['fileUrl'] = $model->path;
+                        $action->output['id'] = $model->id;
+                    }else{
+                        $action->output['fileUrl'] = $action->getWebUrl();//输出文件的相对路径
+                    }
+
+
+
 //                    $action->getFilename(); // "image/yyyymmddtimerand.jpg"
 //                    $action->getWebUrl(); //  "baseUrl + filename, /upload/image/yyyymmddtimerand.jpg"
 //                    $action->getSavePath(); // "/var/www/htdocs/upload/image/yyyymmddtimerand.jpg"
@@ -179,12 +230,13 @@ class GoodsController extends \yii\web\Controller
         ];
     }
 
-    public function behaviors()
+    /*public function behaviors()
     {
         return [
             'rbac'=>[
                 'class'=>RbacFilter::className(),
-            ]
+                 //'except'=>['add'],
+    ]
         ];
-    }
+    }*/
 }

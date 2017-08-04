@@ -3,6 +3,7 @@
 namespace backend\models;
 
 use Yii;
+use yii\bootstrap\Html;
 
 /**
  * This is the model class for table "goods".
@@ -79,6 +80,22 @@ class Goods extends \yii\db\ActiveRecord
             'view_times' => '浏览次数',
         ];
     }
+    /*
+        * 商品和相册关系 1对多
+        */
+    public function getGalleries()
+    {
+        return $this->hasMany(GoodsGallery::className(),['goods_id'=>'id']);
+    }
 
+    //获取图片轮播数据
+    public function getPics()
+    {
+        $images = [];
+        foreach ($this->galleries as $img){
+            $images[] = Html::img($img->path);
+        }
+        return $images;
+    }
 
 }
