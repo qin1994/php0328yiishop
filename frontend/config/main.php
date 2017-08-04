@@ -16,8 +16,9 @@ return [
             'csrfParam' => '_csrf-frontend',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            //'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
+            'identityClass' =>\backend\models\User::className(),
             'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
         ],
         'session' => [
@@ -43,7 +44,19 @@ return [
             'rules' => [
             ],
         ],
-
+        'sms'=>[
+            'class'=>\frontend\components\AliyunSms::className(),
+            'accessKeyId'=>'LTAIDEjTJvKbhhoU',
+            'accessKeySecret'=>'tUWnRGXPEbVoLPNq2Im7yy5yCfpnKd',
+            'signName'=>'覃益佳',
+            'templateCode'=>'SMS_80020043'
+        ],
+        'redis' => [
+            'class' => 'yii\redis\Connection',
+            'hostname' => 'localhost',
+            'port' => 6379,
+            'database' => 0,
+        ],
     ],
     'params' => $params,
 ];
