@@ -32,14 +32,19 @@ class MemberController extends \yii\web\Controller
         $model = new Member();
         $model->scenario = Member::SCENARIO_REGISTER;
         if($model->load(\Yii::$app->request->post()) && $model->validate()){
+            $redis = \Yii::$app->redis;
+            $tel = $redis->get('tel');
+            $code = $redis->get('code');
+            if($tel == $model->tel && $code == $model->captcha){
 
 
-            $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password_hash);
-            $model->auth_key = \Yii::$app->security->generateRandomString();
-            $model->status = 1;
-            $model->created_at = time();
-            $model->save();
-            return $this->redirect(['member/login']);
+                $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password_hash);
+                $model->auth_key = \Yii::$app->security->generateRandomString();
+                $model->status = 1;
+                $model->created_at = time();
+                $model->save();
+                return $this->redirect(['member/login']);
+            }
         }
         return $this->render('register',['model'=>$model]);
     }
